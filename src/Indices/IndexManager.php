@@ -132,6 +132,48 @@ class IndexManager
         return $this;
     }
 
+    public function reindex(string $oldIndexName, string $newIndexName): self
+    {
+        $this->client->reindex([
+            'body' => [
+                'source' => [
+                    'index' => $oldIndexName,
+                ],
+                'dest'   => [
+                    'index' => $newIndexName,
+                ],
+            ],
+        ]);
+
+        return $this;
+    }
+
+    public function moveAliasRaw(string $indexName, string $aliasName): self
+    {
+        $params = [
+            'body' => [
+                'actions' => [
+                    [
+                        'remove' => [
+                            'index' => '*',
+                            'alias' => $aliasName,
+                        ],
+                    ],
+                    [
+                        'add' => [
+                            'index' => $indexName,
+                            'alias' => $aliasName,
+                        ]
+                    ]
+                ]
+            ]
+        ];
+
+        $this->client->indices()->updateAliases($params);
+
+        return $this;
+    }
+
     public function putAlias(string $indexName, Alias $alias): self
     {
         $params = [
